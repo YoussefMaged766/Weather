@@ -98,14 +98,15 @@
                     app:layout_constraintTop_toBottomOf="@id/weatherIcon"
                     tools:text="Sunny" />
 
-                <TextView
+                <com.example.weather.utils.GradiantTextVView
                     android:id="@+id/txtTemp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/poppins_bold"
-                    android:textSize="30sp"
+                    android:textSize="80sp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_margin="10dp"/>
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>

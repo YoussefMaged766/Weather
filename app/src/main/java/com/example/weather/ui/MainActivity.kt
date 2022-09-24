@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
                             binding.cardDetails.setBackgroundResource(R.drawable.custom_card)
                             Glide.with(applicationContext).load("http:"+it.data?.current?.condition?.icon).into(binding.weatherIcon)
                             binding.txtWeather.text = it.data?.current?.condition?.text
-                            binding.txtTemp.text = it.data?.current?.tempC.toString()
+                            binding.txtTemp.text = it.data?.current?.tempC?.toInt().toString()+"°"
                             setUpText()
                         }
 
@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
             Color.parseColor("#AECDFF"),
             Color.parseColor("#FDB54E"),
             Color.parseColor("#fff")
-        ), null, Shader.TileMode.REPEAT)
+        ), null, Shader.TileMode.CLAMP)
 
         binding.txtTemp.paint.shader = textShader
     }
