@@ -9,6 +9,7 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -20,6 +21,8 @@ import com.example.weather.R
 import com.example.weather.databinding.ActivityMainBinding
 import com.example.weather.utils.Status
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var viewModel: MainViewModel
@@ -115,17 +118,12 @@ class MainActivity : AppCompatActivity() {
                 it.let {
                     when(it.status){
                         Status.SUCCESS->{
-                            binding.txtCountry.text = it.data?.location?.country
-                            binding.txtRegion.text = it.data?.location?.region
-                            binding.txtDay.text = it.data?.location?.localtime
-                            binding.lottie.setAnimation(R.raw.location)
-                            binding.lottie.playAnimation()
+                            binding.txtCountry.text = "${it.data?.location?.country}, ${it.data?.location?.region}"
                             binding.actionBar.toolbar.title = it.data?.location?.name
-                            binding.cardDetails.setBackgroundResource(R.drawable.custom_card)
-                            Glide.with(applicationContext).load("http:"+it.data?.current?.condition?.icon).into(binding.weatherIcon)
                             binding.txtWeather.text = it.data?.current?.condition?.text
-                            binding.txtTemp.text = it.data?.current?.tempC?.toInt().toString()+"°"
-                            setUpText()
+                            binding.txtTemp.text = it.data?.current?.tempC?.toInt().toString()
+                            binding.txtDegree.visibility = View.VISIBLE
+                            dateFormat()
                         }
 
                         Status.LOADING->{}
@@ -140,15 +138,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setUpText(){
-        val paint = binding.txtTemp.paint
-        val width = paint.measureText(binding.txtTemp.text.toString())
-        val textShader: Shader = LinearGradient(0f, 0f, width, binding.txtTemp.textSize, intArrayOf(
-            Color.parseColor("#AECDFF"),
-            Color.parseColor("#FDB54E"),
-            Color.parseColor("#fff")
-        ), null, Shader.TileMode.CLAMP)
+   private fun dateFormat(){
+        val simpleDateFormat = SimpleDateFormat("EE, dd MMM "  , Locale.US)
+        val dateTime:String = simpleDateFormat.format(Calendar.getInstance().timeInMillis).toString()
+        binding.txtDay.text  =dateTime
 
-        binding.txtTemp.paint.shader = textShader
     }
+
+
 }
