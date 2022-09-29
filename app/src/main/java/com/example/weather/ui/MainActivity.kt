@@ -1,9 +1,6 @@
 package com.example.weather.ui
 
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.LinearGradient
-import android.graphics.Shader
 import android.location.LocationListener
 import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
@@ -16,8 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
-import com.example.weather.R
+import com.example.weather.adapter.HourAdapter
 import com.example.weather.databinding.ActivityMainBinding
 import com.example.weather.utils.Status
 import kotlinx.coroutines.launch
@@ -27,6 +23,8 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     lateinit var viewModel: MainViewModel
     lateinit var binding: ActivityMainBinding
+    lateinit var adapter:HourAdapter
+
 
       var locationListener =LocationListener{
           showDetailes(it.latitude,it.longitude)
@@ -37,6 +35,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initialize()
         getLocation()
+
+
+
+
+
 
 
     }
@@ -106,10 +109,7 @@ class MainActivity : AppCompatActivity() {
    private fun initialize() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel = ViewModelProvider(
-            this,
-            ViewModelFactory()
-        )[MainViewModel::class.java]
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
     }
 
    private fun showDetailes(latitude :Double ,longitude:Double ) {
@@ -122,6 +122,7 @@ class MainActivity : AppCompatActivity() {
                             binding.actionBar.toolbar.title = it.data?.location?.name
                             binding.txtWeather.text = it.data?.current?.condition?.text
                             binding.txtTemp.text = it.data?.current?.tempC?.toInt().toString()
+                            binding.txtFeelLike.text = "Feels like ${it.data?.current?.feelslikeC?.toInt()}°"
                             binding.txtDegree.visibility = View.VISIBLE
                             dateFormat()
                         }
@@ -135,6 +136,31 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             })
+
+            viewModel.getForecastDetails(latitude,longitude,7).observe(this@MainActivity, Observer {
+                it.let {
+                    when(it.status){
+                        Status.SUCCESS->{
+                            adapter = HourAdapter(it.data?.forecast?.forecastday?.get(0)?.hour!!)
+                            binding.recyclerHours.adapter=adapter
+
+                            binding.txtSunRise.text = it.data.forecast.forecastday[0].astro?.sunrise
+                            binding.txtSunSet.text = it.data.forecast.forecastday[0].astro?.sunset
+                            binding.txtPrecip.text = "${it.data.forecast.forecastday[0].day?.totalprecipMm?.toInt()}%"
+                            binding.txtHumidity.text = "${it.data.forecast.forecastday[0].hour?.get(0)?.humidity}%"
+
+                        }
+                        Status.LOADING->{
+                            Log.e( "showDetailes: ",it.data.toString() )
+                        }
+                        Status.ERROR->{
+                            Toast.makeText(applicationContext,it.message.toString(),Toast.LENGTH_SHORT).show()
+//                            Log.e( "showDetailes: ",it.message.toString() )
+
+                        }
+                    }
+                }
+            })
         }
     }
 
@@ -144,6 +170,14 @@ class MainActivity : AppCompatActivity() {
         binding.txtDay.text  =dateTime
 
     }
+
+
+
+
+
+
+
+
 
 
 }

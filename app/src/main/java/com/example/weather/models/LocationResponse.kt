@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class LocationResponse(
 
 	@field:SerializedName("current")
-	val current: Current? = null,
+	 val current: Current? = null,
 
 	@field:SerializedName("location")
 	val location: Location? = null
@@ -21,7 +21,10 @@ data class Condition(
 
 	@field:SerializedName("text")
 	val text: String? = null
+
+
 )
+
 
 data class Current(
 

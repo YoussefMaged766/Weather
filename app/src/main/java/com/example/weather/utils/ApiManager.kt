@@ -1,5 +1,6 @@
 package com.example.weather.utils
 
+import com.example.weather.ui.MainActivity
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -24,15 +25,10 @@ class ApiManager {
                     chain.proceed(original)
                 }
 
-
-
-
                 val client = OkHttpClient.Builder()
                     .addInterceptor(httpLoggingInterceptor)
                     .addInterceptor(keyInterceptor)
                     .build()
-
-
 
                 retrofit = Retrofit.Builder()
                     .baseUrl("http://api.weatherapi.com/v1/")
@@ -49,5 +45,7 @@ class ApiManager {
 
         }
     }
+
+
 
 }
