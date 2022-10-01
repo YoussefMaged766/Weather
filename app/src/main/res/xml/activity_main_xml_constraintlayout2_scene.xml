@@ -12,30 +12,57 @@
                motion:motionTarget="@+id/imageView"
                motion:framePosition="150"
                android:alpha="0" />
-           <KeyAttribute
-               motion:motionTarget="@+id/imageView"
-               motion:framePosition="100"
-               android:scaleX="0" />
-           <KeyAttribute
-               motion:motionTarget="@+id/imageView"
-               motion:framePosition="100"
-               android:scaleY="0" />
+
        </KeyFrameSet>
         <OnSwipe
             motion:touchAnchorId="@+id/imageView"
             motion:touchAnchorSide="bottom" />
+
     </Transition>
 
     <ConstraintSet android:id="@+id/start">
-
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
         <Constraint
             android:id="@+id/imageView"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="0dp"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintBottom_toBottomOf="@+id/recyclerHours"
              />
+        <Constraint
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_width="50dp"
+            motion:layout_constraintTop_toBottomOf="@id/txtDay"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/txtTemp"
+            />
+
+
+        <Constraint
+            android:id="@+id/txtFeelLike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintTop_toBottomOf="@id/txtTemp"
+            motion:layout_constraintStart_toStartOf="@id/txtTemp" />
+        <Constraint
+
+            android:layout_height="wrap_content"
+            motion:layout_constraintStart_toEndOf="@id/txtDegree"
+            motion:layout_constraintTop_toTopOf="@id/txtTemp"
+            motion:layout_constraintBottom_toBottomOf="@id/txtTemp"
+            android:layout_marginStart="8dp"
+            android:layout_width="wrap_content"
+            android:id="@+id/txtWeather" />
+        <Constraint
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            motion:layout_constraintTop_toBottomOf="@id/txtFeelLike"
+            android:id="@+id/recyclerHours"
+             />
+
 
     </ConstraintSet>
 </MotionScene>
