@@ -1,9 +1,9 @@
 package com.example.weather.ui
 
 
-
-
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
@@ -11,7 +11,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -20,24 +19,41 @@ import androidx.lifecycle.lifecycleScope
 import com.example.weather.R
 import com.example.weather.adapter.HourAdapter
 import com.example.weather.databinding.ActivityMainBinding
+import com.example.weather.models.CurrentResponse
 import com.example.weather.utils.Status
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
     lateinit var viewModel: MainViewModel
     lateinit var binding: ActivityMainBinding
     lateinit var adapter: HourAdapter
-
+    private var isopen = false
+    var addresses: ArrayList<Address> = ArrayList()
+    lateinit var cityName: String
+    lateinit var stateName: String
+    lateinit var countryName: String
 
 
     var locationListener = LocationListener {
         showDetailes(it.latitude, it.longitude)
 
+        try {
+            val geocoder = Geocoder(this, Locale.getDefault())
+            addresses = geocoder.getFromLocation(it.latitude, it.longitude, 1) as ArrayList<Address>
+            countryName = addresses.get(0).countryName
+            stateName = addresses[0].adminArea
+            cityName = addresses[0].subAdminArea
+
+        } catch (e: Exception) {
+            Log.d("onCreate1: ", e.message.toString())
+        }
+        Log.e("adress: ", addresses.toString())
     }
 
 
@@ -47,7 +63,8 @@ class MainActivity : AppCompatActivity() {
         getLocation()
 
 
-
+//         stateName= addresses[0].getAddressLine(1)
+//         countryName= addresses[0].getAddressLine(2)
 
 
 //        bottomSheetBehavior = BottomSheetBehavior.from(bottomsheet)
@@ -55,21 +72,26 @@ class MainActivity : AppCompatActivity() {
 
         val bottomView = findViewById<View>(R.id.linearLayout2)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomView)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+//        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBehavior.peekHeight = 200
-//ليهم لزمه دلوقتى؟
-//        val colayout = findViewById<View>(R.id.constraintLayout2) as CoordinatorLayout
-//        val bottomSheet = colayout.findViewById<View>(R.id.linearLayout2)
-//        val behavior: BottomSheetBehavior<*> = BottomSheetBehavior.from(bottomSheet)
-//        behavior.setBottomSheetCallback(object : BottomSheetCallback() {
-//            override fun onStateChanged(bottomSheet: View, newState: Int) {
-//                // React to state change
-//            }
-//
-//            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-//                // React to dragging events
-//            }
-//        })
+
+
+        bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+//                Log.d("onStateChanged: $",newState.toString())
+                // React to state change
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // React to dragging events
+
+                Log.d("onSlide: ", "$slideOffset")
+
+                binding.ml.transitionToState((slideOffset * 2).toInt())
+
+
+            }
+        })
 
     }
 
@@ -145,17 +167,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun showDetailes(latitude: Double, longitude: Double) {
         lifecycleScope.launch {
-            viewModel.getLocationDetails(latitude, longitude).observe(this@MainActivity, Observer {
+            viewModel.getLocationDetails(latitude, longitude,"metric").collect {
                 it.let {
                     when (it.status) {
                         Status.SUCCESS -> {
-                            binding.txtCountry.text =
-                                "${it.data?.location?.country}, ${it.data?.location?.region}"
-                            binding.actionBar.toolbar.title = it.data?.location?.name
-                            binding.txtWeather.text = it.data?.current?.condition?.text
-                            binding.txtTemp.text = it.data?.current?.tempC?.toInt().toString()
+                            binding.txtCountry.text = "$countryName, $stateName"
+                            binding.actionBar.toolbar.title = cityName
+                            binding.txtWeather.text = it.data?.current?.weather?.get(0)?.description
+                            binding.txtTemp.text = it.data?.current?.temp?.toInt().toString()
                             binding.txtFeelLike.text =
-                                "Feels like ${it.data?.current?.feelslikeC?.toInt()}°"
+                                "Feels like ${it.data?.current?.feelsLike?.toInt()}°"
                             binding.txtDegree.visibility = View.VISIBLE
                             dateFormat()
                         }
@@ -168,41 +189,33 @@ class MainActivity : AppCompatActivity() {
                                 it.message.toString(),
                                 Toast.LENGTH_SHORT
                             ).show()
-                            Log.e("error: ", it.message.toString())
+                            Log.e("weather: ", it.message.toString())
                         }
                     }
                 }
-            })
+            }
 
-            viewModel.getForecastDetails(latitude, longitude, 7)
-                .observe(this@MainActivity, Observer {
+            viewModel.getLocationDetails(latitude, longitude,"metric")
+                .collect {
                     it.let {
                         when (it.status) {
                             Status.SUCCESS -> {
                                 adapter =
-                                    HourAdapter(it.data?.forecast?.forecastday?.get(0)?.hour!!)
+                                    HourAdapter(it.data?.hourly!!)
                                 binding.recyclerHours.adapter = adapter
 
-                                binding.txtSunRise.text =
-                                    it.data.forecast.forecastday[0].astro?.sunrise
-                                binding.txtSunSet.text =
-                                    it.data.forecast.forecastday[0].astro?.sunset
-                                binding.txtPrecip.text =
-                                    "${it.data.forecast.forecastday[0].day?.totalprecipMm?.toInt()}%"
+                                convertDate(it.data.current?.sunrise!!, it.data.current.sunset!!)
+
+
+                                binding.txtPrecip.text = "${it.data?.current?.visibility}"
                                 binding.txtHumidity.text =
-                                    "${it.data.forecast.forecastday[0].hour?.get(0)?.humidity}%"
+                                    "${it.data?.current?.humidity}%"
 
                                 binding.txtWind.text =
-                                    "${
-                                        it.data.forecast.forecastday[0].hour?.get(0)?.windKph?.toInt()
-                                            .toString()
-                                    } km/h"
+                                    "${it.data?.current?.windSpeed?.toInt().toString()} km/h"
 
                                 binding.txtPressure.text =
-                                    "${
-                                        it.data.forecast.forecastday[0].hour?.get(0)?.pressureMb?.toInt()
-                                            .toString()
-                                    } hPa"
+                                    "${it.data?.current?.pressure?.toString()} hPa"
 
 
                             }
@@ -215,12 +228,13 @@ class MainActivity : AppCompatActivity() {
                                     it.message.toString(),
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                Log.e("weather: ", it.message.toString())
 //                            Log.e( "showDetailes: ",it.message.toString() )
 
                             }
                         }
                     }
-                })
+                }
         }
     }
 
@@ -231,6 +245,19 @@ class MainActivity : AppCompatActivity() {
         binding.txtDay.text = dateTime
 
     }
+
+    fun convertDate(dateRise: Long, dateSet: Long) {
+
+        val sunRise: String =
+            SimpleDateFormat(" H:mm aa", Locale.getDefault()).format(dateRise*1000)
+        val sunSet: String =
+            SimpleDateFormat(" h:mm aa", Locale.US).format(dateSet*1000).toString()
+
+        binding.txtSunSet.text = sunSet
+        binding.txtSunRise.text = sunRise
+    }
+
+
 
 
 }

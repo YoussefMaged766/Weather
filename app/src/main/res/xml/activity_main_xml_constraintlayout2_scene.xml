@@ -14,9 +14,9 @@
                android:alpha="0" />
 
        </KeyFrameSet>
-        <OnSwipe
-            motion:touchAnchorId="@+id/imageView"
-            motion:touchAnchorSide="bottom" />
+<!--        <OnSwipe-->
+<!--            motion:touchAnchorId="@+id/imageView"-->
+<!--            motion:touchAnchorSide="bottom" />-->
 
     </Transition>
 

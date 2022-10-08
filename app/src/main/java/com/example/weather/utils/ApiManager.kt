@@ -20,7 +20,7 @@ class ApiManager {
 
                 val keyInterceptor = Interceptor{chain :Interceptor.Chain->
                     var original = chain.request()
-                    var url: HttpUrl = original.url.newBuilder().addQueryParameter("key",Constants.API_KEY).build()
+                    var url: HttpUrl = original.url.newBuilder().addQueryParameter("appid",Constants.API_KEY).build()
                     original = original.newBuilder().url(url).build()
                     chain.proceed(original)
                 }
@@ -31,7 +31,7 @@ class ApiManager {
                     .build()
 
                 retrofit = Retrofit.Builder()
-                    .baseUrl("http://api.weatherapi.com/v1/")
+                    .baseUrl("https://api.openweathermap.org/data/2.5/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(client)
                     .build()
