@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        tools:context=".ui.MainActivity"
-        android:layoutDirection="ltr">
+        android:layoutDirection="ltr"
+        tools:context=".ui.MainActivity">
 
         <androidx.constraintlayout.motion.widget.MotionLayout
             android:id="@+id/ml"
@@ -46,7 +46,7 @@
                 android:layout_marginTop="4dp"
                 android:gravity="center"
                 android:textSize="20sp"
-                android:theme="@style/textAddress"
+                android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/actionBar"
@@ -62,7 +62,8 @@
                 app:layout_constraintEnd_toEndOf="@+id/txtCountry"
                 app:layout_constraintStart_toStartOf="@id/txtCountry"
                 app:layout_constraintTop_toBottomOf="@id/txtCountry"
-                tools:text="Sunday" />
+                tools:text="Sunday"
+                android:textColor="@color/white"/>
 
             <TextView
                 android:id="@+id/txtWeather"
@@ -84,12 +85,12 @@
                 android:layout_marginTop="10dp"
                 android:autoSizeTextType="uniform"
                 android:fontFamily="@font/poppins"
+                tools:text="23"
                 android:textColor="@color/white"
                 android:textSize="60sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/txtDay"
-                android:text="23" />
+                app:layout_constraintTop_toBottomOf="@id/txtDay" />
 
             <TextView
                 android:id="@+id/txtFeelLike"
@@ -113,32 +114,72 @@
                 app:layout_constraintStart_toEndOf="@id/txtTemp"
                 app:layout_constraintTop_toTopOf="@id/txtTemp" />
 
+
+            <LinearLayout
+                android:id="@+id/linear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/txtWeather">
+
+                <TextView
+                    android:id="@+id/txtToday"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Today"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="@font/poppins"
+                    android:textColor="@color/white"/>
+
+                <TextView
+                    android:id="@+id/txtTomorrow"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Tomorrow"
+                    android:fontFamily="@font/poppins"
+                    android:textColor="#9ba3c4"/>
+
+                <TextView
+                    android:id="@+id/txtNext"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/poppins"
+                    android:gravity="right"
+                    android:text="Next 7 Days >"
+                    android:textColor="#1c9cd7"
+                    android:layout_marginEnd="8dp"/>
+
+            </LinearLayout>
+            <View
+                android:id="@+id/view"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                app:layout_constraintTop_toBottomOf="@id/linear"
+                android:layout_marginVertical="16dp"
+                android:background="#9ba3c4"/>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerHours"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:orientation="horizontal"
+                android:layout_marginTop="16dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/txtWeather"
+                app:layout_constraintTop_toBottomOf="@id/view"
                 tools:listitem="@layout/hour_item" />
 
 
         </androidx.constraintlayout.motion.widget.MotionLayout>
 
-<!--        <include layout="@layout/item_bottom_sheet"-->
-<!--            android:id="@+id/bottomSheet"-->
-<!--            android:layout_gravity="bottom"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"/>-->
 
         <FrameLayout
             android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-
-
             >
 
             <LinearLayout
@@ -149,8 +190,13 @@
                 android:background="@drawable/bottomsheetbackground"
                 android:orientation="vertical"
                 android:padding="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                >
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <View
+                    android:layout_width="60dp"
+                    android:layout_height="8dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/custom_view_bottomsheet" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -316,8 +362,6 @@
             </LinearLayout>
 
         </FrameLayout>
-
-
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

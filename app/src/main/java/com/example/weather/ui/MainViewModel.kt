@@ -29,14 +29,6 @@ class MainViewModel @Inject constructor() :ViewModel() {
 
 
 
-    suspend fun getForecastDetails(q:Double , q1:Double , days:Int) = liveData(Dispatchers.IO){
-        emit(Resource.loading(null))
-        try {
-            emit(Resource.success(repository.FetchForecastDetails(q,q1 ,days)))
 
-        } catch (e:Exception){
-            emit(Resource.error(null , e.message.toString()))
-        }
-    }
 
 }

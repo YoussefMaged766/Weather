@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<MotionScene 
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:motion="http://schemas.android.com/apk/res-auto">
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Transition
         motion:constraintSetEnd="@+id/end"
         motion:constraintSetStart="@id/start"
-        motion:duration="1000">
+        motion:duration="500">
        <KeyFrameSet>
            <KeyAttribute
                motion:motionTarget="@+id/imageView"
@@ -14,9 +14,11 @@
                android:alpha="0" />
 
        </KeyFrameSet>
-<!--        <OnSwipe-->
-<!--            motion:touchAnchorId="@+id/imageView"-->
-<!--            motion:touchAnchorSide="bottom" />-->
+        <OnSwipe
+            app:dragDirection="dragUp"
+            app:onTouchUp="autoCompleteToStart"
+            app:touchAnchorId="@+id/linearLayout2"
+            app:touchAnchorSide="top"/>
 
     </Transition>
 
@@ -59,9 +61,21 @@
         <Constraint
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            motion:layout_constraintTop_toBottomOf="@id/txtFeelLike"
+            motion:layout_constraintTop_toBottomOf="@id/view"
             android:id="@+id/recyclerHours"
              />
+        <Constraint
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            motion:layout_constraintTop_toBottomOf="@id/linear"
+            android:id="@+id/view"
+            />
+        <Constraint
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            motion:layout_constraintTop_toBottomOf="@id/txtFeelLike"
+            android:id="@+id/linear"
+            motion:layout_constraintStart_toStartOf="parent" />
 
 
     </ConstraintSet>

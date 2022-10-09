@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.example.weather.databinding.HourItemBinding
-import com.example.weather.models.HourItem
 import com.example.weather.models.HourlyItem
 import com.example.weather.utils.Constants
 import java.text.SimpleDateFormat
@@ -19,9 +18,9 @@ class HourAdapter(var items: List<HourlyItem>) :RecyclerView.Adapter<HourAdapter
 
        fun bind(data:HourlyItem){
 
-           binding.txtDegree.text = data.temp?.toInt().toString()
+           binding.txtDegree.text = "${data.temp?.toInt().toString()}°"
            Glide.with(binding.root).load(Constants.IMG_LINK + data.weather!![0]?.icon+".png").into(binding.imgIcon)
-           binding.txtWeather.text = data.weather[0]!!.main
+//           binding.txtWeather.text = data.weather[0]!!.main
            binding.txtDate.text = SimpleDateFormat("h aa" ,Locale.US).format(data.dt!!* 1000)
        }
    }

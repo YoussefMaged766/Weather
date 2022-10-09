@@ -14,11 +14,6 @@ interface WebServices {
     ) :CurrentResponse
 
 
-    @GET("forecast.json")
-    suspend fun GetForecastDetails(
-        @Query("q")  q:Double,
-        @Query("q")  q1:Double,
-        @Query("days") days :Int
-    ) : ForecastResponse
+
 
 }

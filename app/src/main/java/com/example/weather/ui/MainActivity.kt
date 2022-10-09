@@ -1,7 +1,10 @@
 package com.example.weather.ui
 
 
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.location.Address
 import android.location.Geocoder
 import android.location.LocationListener
@@ -13,20 +16,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.weather.R
 import com.example.weather.adapter.HourAdapter
 import com.example.weather.databinding.ActivityMainBinding
-import com.example.weather.models.CurrentResponse
 import com.example.weather.utils.Status
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -61,15 +61,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initialize()
         getLocation()
-
-
-//         stateName= addresses[0].getAddressLine(1)
-//         countryName= addresses[0].getAddressLine(2)
-
-
-//        bottomSheetBehavior = BottomSheetBehavior.from(bottomsheet)
-
-
+        binding.actionBar.toolbar.setTitleTextColor(Color.WHITE)
         val bottomView = findViewById<View>(R.id.linearLayout2)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomView)
 //        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -80,14 +72,16 @@ class MainActivity : AppCompatActivity() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
 //                Log.d("onStateChanged: $",newState.toString())
                 // React to state change
+
+                if (newState == BottomSheetBehavior.STATE_EXPANDED )
+                    binding.ml.transitionToEnd()
+                else binding.ml.transitionToStart()
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 // React to dragging events
 
                 Log.d("onSlide: ", "$slideOffset")
-
-                binding.ml.transitionToState((slideOffset * 2).toInt())
 
 
             }
@@ -207,12 +201,12 @@ class MainActivity : AppCompatActivity() {
                                 convertDate(it.data.current?.sunrise!!, it.data.current.sunset!!)
 
 
-                                binding.txtPrecip.text = "${it.data?.current?.visibility}"
+                                binding.txtPrecip.text = "${it.data?.hourly[0].pop?.times(100)}%"
                                 binding.txtHumidity.text =
                                     "${it.data?.current?.humidity}%"
 
                                 binding.txtWind.text =
-                                    "${it.data?.current?.windSpeed?.toInt().toString()} km/h"
+                                    "${it.data?.current?.windSpeed?.toInt().toString()} m/s"
 
                                 binding.txtPressure.text =
                                     "${it.data?.current?.pressure?.toString()} hPa"
@@ -235,8 +229,15 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+            binding.txtNext.setOnClickListener{
+                val intent = Intent(applicationContext , DaysActivity::class.java)
+                intent.putExtra("lat" , latitude)
+                intent.putExtra("lon",longitude)
+                startActivity(intent)
+            }
         }
     }
+
 
     private fun dateFormat() {
         val simpleDateFormat = SimpleDateFormat("EE, dd MMM ", Locale.US)
