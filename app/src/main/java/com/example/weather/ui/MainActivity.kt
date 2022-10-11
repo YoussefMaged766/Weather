@@ -1,8 +1,6 @@
 package com.example.weather.ui
 
 
-
-
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -16,8 +14,11 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -68,6 +69,10 @@ class MainActivity : AppCompatActivity() {
         initialize()
         getLocation()
 
+
+        setSupportActionBar(binding.actionBar.toolbar)
+
+
         binding.actionBar.toolbar.setTitleTextColor(Color.WHITE)
         val bottomView = findViewById<View>(R.id.linearLayout2)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomView)
@@ -75,12 +80,13 @@ class MainActivity : AppCompatActivity() {
         bottomSheetBehavior.peekHeight = 200
 
 
+
         bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
 //                Log.d("onStateChanged: $",newState.toString())
                 // React to state change
 
-                if (newState == BottomSheetBehavior.STATE_EXPANDED )
+                if (newState == BottomSheetBehavior.STATE_EXPANDED)
                     binding.ml.transitionToEnd()
                 else binding.ml.transitionToStart()
             }
@@ -162,93 +168,24 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        sharedPreferences =  getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
+        sharedPreferences = getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
 
     }
 
     private fun showDetailes(latitude: Double, longitude: Double) {
         lifecycleScope.launch {
-            viewModel.getLocationDetails(latitude, longitude,"metric").collect {
-                it.let {
-                    when (it.status) {
-                        Status.SUCCESS -> {
-                            binding.txtCountry.text = "$countryName, $stateName"
-                            binding.actionBar.toolbar.title = cityName
-                            binding.txtWeather.text = it.data?.current?.weather?.get(0)?.description
-                            binding.txtTemp.text = it.data?.current?.temp?.toInt().toString()
-                            binding.txtFeelLike.text =
-                                "Feels like ${it.data?.current?.feelsLike?.toInt()}°"
-                            binding.txtDegree.visibility = View.VISIBLE
-                            dateFormat()
-                        }
-
-                        Status.LOADING -> {}
-
-                        Status.ERROR -> {
-                            Toast.makeText(
-                                this@MainActivity,
-                                it.message.toString(),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            Log.e("weather: ", it.message.toString())
-                        }
-                    }
+            if (sharedPreferences.getString("Temp","Celsius").equals("Celsius")){
+               changeApiTemp("metric" , latitude,longitude)
+                }  else if (sharedPreferences.getString("Temp","Celsius").equals("Fahrenheit")){
+                changeApiTemp("imperial" , latitude,longitude)
                 }
-
-                 sharedPreferences.edit().putString("stateName" , stateName).apply()
-                it.data?.current?.temp?.toInt()
-                    ?.let { it1 -> sharedPreferences.edit().putInt("temp" , it1).apply() }
-
-                sharedPreferences.edit().putString("weather" , it.data?.current?.weather?.get(0)?.description).apply()
-
             }
-
-            viewModel.getLocationDetails(latitude, longitude,"metric")
-                .collect {
-                    it.let {
-                        when (it.status) {
-                            Status.SUCCESS -> {
-                                adapter =
-                                    HourAdapter(it.data?.hourly!!)
-                                binding.recyclerHours.adapter = adapter
-
-                                convertDate(it.data.current?.sunrise!!, it.data.current.sunset!!)
-
-
-                                binding.txtPrecip.text = "${it.data?.hourly[0].pop?.times(100)}%"
-                                binding.txtHumidity.text =
-                                    "${it.data?.current?.humidity}%"
-
-                                binding.txtWind.text =
-                                    "${it.data?.current?.windSpeed?.toInt().toString()} m/s"
-
-                                binding.txtPressure.text =
-                                    "${it.data?.current?.pressure?.toString()} hPa"
-
-
-                            }
-                            Status.LOADING -> {
-                                Log.e("showDetailes: ", it.data.toString())
-                            }
-                            Status.ERROR -> {
-                                Toast.makeText(
-                                    applicationContext,
-                                    it.message.toString(),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                Log.e("weather: ", it.message.toString())
-//                            Log.e( "showDetailes: ",it.message.toString() )
-
-                            }
-                        }
-                    }
-                }
-            binding.txtNext.setOnClickListener{
-                val intent = Intent(applicationContext , DaysActivity::class.java)
-                intent.putExtra("lat" , latitude)
-                intent.putExtra("lon",longitude)
+        binding.txtNext.setOnClickListener {
+                val intent = Intent(applicationContext, DaysActivity::class.java)
+                intent.putExtra("lat", latitude)
+                intent.putExtra("lon", longitude)
                 startActivity(intent)
-            }
+
         }
     }
 
@@ -264,9 +201,9 @@ class MainActivity : AppCompatActivity() {
     fun convertDate(dateRise: Long, dateSet: Long) {
 
         val sunRise: String =
-            SimpleDateFormat(" H:mm aa", Locale.getDefault()).format(dateRise*1000)
+            SimpleDateFormat(" H:mm aa", Locale.getDefault()).format(dateRise * 1000)
         val sunSet: String =
-            SimpleDateFormat(" h:mm aa", Locale.US).format(dateSet*1000).toString()
+            SimpleDateFormat(" h:mm aa", Locale.US).format(dateSet * 1000).toString()
 
         binding.txtSunSet.text = sunSet
         binding.txtSunRise.text = sunRise
@@ -275,24 +212,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        startService(Intent(applicationContext,MyService::class.java))
+        startService(Intent(applicationContext, MyService::class.java))
         createNotification()
     }
 
     override fun onResume() {
-        stopService(Intent(applicationContext,MyService::class.java))
+        stopService(Intent(applicationContext, MyService::class.java))
         super.onResume()
     }
 
     override fun onStart() {
         super.onStart()
-        stopService(Intent(applicationContext,MyService::class.java))
+        stopService(Intent(applicationContext, MyService::class.java))
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        startService(Intent(applicationContext,MyService::class.java))
-        Log.e( "onDestroy: ","Destroy" )
+        startService(Intent(applicationContext, MyService::class.java))
+        Log.e("onDestroy: ", "Destroy")
     }
 
     fun createNotification() {
@@ -313,7 +250,99 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        return when (item.itemId) {
+            R.id.setting -> {
+              startActivity(Intent(applicationContext, SettingActivity::class.java))
+                return true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+
+    }
+    suspend fun changeApiTemp(unit:String , latitude :Double , longitude:Double){
+        viewModel.getLocationDetails(latitude, longitude, unit).collect {
+            it.let {
+                when (it.status) {
+                    Status.SUCCESS -> {
+                        binding.txtCountry.text = "$countryName, $stateName"
+                        binding.actionBar.toolbar.title = cityName
+                        if (unit == "metric"){
+                            binding.txtTemp.text = it.data?.current?.temp?.toInt().toString()
+                        } else{
+                            binding.txtTemp.text = it.data?.current?.temp?.toInt().toString()
+                            binding.txtDegree.text = "°F"
+                        }
+                        binding.txtWeather.text = it.data?.current?.weather?.get(0)?.description
+
+                        binding.txtFeelLike.text =
+                            "Feels like ${it.data?.current?.feelsLike?.toInt()}°"
+                        binding.txtDegree.visibility = View.VISIBLE
+                        dateFormat()
+
+                        adapter =
+                            HourAdapter(it.data?.hourly!!)
+                        binding.recyclerHours.adapter = adapter
+                        convertDate(it.data.current?.sunrise!!, it.data.current.sunset!!)
+
+                        binding.txtPrecip.text = "${it.data?.hourly[0].pop?.times(100)}%"
+                        binding.txtHumidity.text =
+                            "${it.data?.current?.humidity}%"
+
+                        if (unit=="metric"){
+                            binding.txtWind.text =
+                                "${it.data?.current?.windSpeed?.toInt().toString()} m/s"
+                        } else{
+                            binding.txtWind.text =
+                                "${it.data?.current?.windSpeed?.toInt().toString()} mile/h"
+                        }
+
+
+
+                        binding.txtPressure.text =
+                            "${it.data?.current?.pressure?.toString()} hPa"
+
+                        binding.ml.visibility = View.VISIBLE
+                        binding.linearLayout2.visibility = View.VISIBLE
+                        binding.lottie.visibility = View.GONE
+
+                    }
+
+                    Status.LOADING -> {
+                        binding.lottie.playAnimation()
+                        binding.lottie.visibility = View.VISIBLE
+                        binding.linearLayout2.visibility = View.INVISIBLE
+                    }
+
+                    Status.ERROR -> {
+                        Toast.makeText(
+                            this@MainActivity,
+                            it.message.toString(),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        Log.e("weather: ", it.message.toString())
+                        binding.ml.visibility = View.VISIBLE
+                        binding.linearLayout2.visibility = View.VISIBLE
+                        binding.lottie.visibility = View.GONE
+                    }
+                }
+            }
+
+            sharedPreferences.edit().putString("stateName", stateName).apply()
+            it.data?.current?.temp?.toInt()
+                ?.let { it1 -> sharedPreferences.edit().putInt("temp", it1).apply() }
+
+            sharedPreferences.edit()
+                .putString("weather", it.data?.current?.weather?.get(0)?.description).apply()
+
+        }
+    }
 
 
 }

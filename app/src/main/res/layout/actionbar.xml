@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
             android:scrollbarSize="0dp"
-            android:theme="?attr/actionBarTheme"
+            android:theme="@style/ToolbarTheme"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_scrollFlags="noScroll"
 
