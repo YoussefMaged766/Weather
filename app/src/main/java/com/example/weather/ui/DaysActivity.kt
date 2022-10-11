@@ -20,11 +20,13 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class DaysActivity : AppCompatActivity() {
+
     lateinit var binding: ActivityDaysBinding
     lateinit var viewModel: MainViewModel
     lateinit var adapter: DaysAdapter
     var addresses: ArrayList<Address> = ArrayList()
     lateinit var sharedPreferences: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDaysBinding.inflate(layoutInflater)
