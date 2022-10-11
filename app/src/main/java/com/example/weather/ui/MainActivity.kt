@@ -1,10 +1,15 @@
 package com.example.weather.ui
 
 
+
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.location.Address
 import android.location.Geocoder
 import android.location.LocationListener
@@ -21,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.weather.R
 import com.example.weather.adapter.HourAdapter
 import com.example.weather.databinding.ActivityMainBinding
+import com.example.weather.utils.MyService
 import com.example.weather.utils.Status
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
@@ -38,7 +44,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var cityName: String
     lateinit var stateName: String
     lateinit var countryName: String
-
+    private lateinit var sharedPreferences: SharedPreferences
 
     var locationListener = LocationListener {
         showDetailes(it.latitude, it.longitude)
@@ -61,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initialize()
         getLocation()
+
         binding.actionBar.toolbar.setTitleTextColor(Color.WHITE)
         val bottomView = findViewById<View>(R.id.linearLayout2)
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomView)
@@ -155,7 +162,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-
+        sharedPreferences =  getSharedPreferences("PREFERENCE_NAME", Context.MODE_PRIVATE)
 
     }
 
@@ -187,6 +194,13 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+
+                 sharedPreferences.edit().putString("stateName" , stateName).apply()
+                it.data?.current?.temp?.toInt()
+                    ?.let { it1 -> sharedPreferences.edit().putInt("temp" , it1).apply() }
+
+                sharedPreferences.edit().putString("weather" , it.data?.current?.weather?.get(0)?.description).apply()
+
             }
 
             viewModel.getLocationDetails(latitude, longitude,"metric")
@@ -256,6 +270,47 @@ class MainActivity : AppCompatActivity() {
 
         binding.txtSunSet.text = sunSet
         binding.txtSunRise.text = sunRise
+    }
+
+
+    override fun onStop() {
+        super.onStop()
+        startService(Intent(applicationContext,MyService::class.java))
+        createNotification()
+    }
+
+    override fun onResume() {
+        stopService(Intent(applicationContext,MyService::class.java))
+        super.onResume()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        stopService(Intent(applicationContext,MyService::class.java))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        startService(Intent(applicationContext,MyService::class.java))
+        Log.e( "onDestroy: ","Destroy" )
+    }
+
+    fun createNotification() {
+        val myIntent = Intent(applicationContext, MyService::class.java)
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val pendingIntent = PendingIntent.getService(this, 0, myIntent, 0)
+        val calendar = Calendar.getInstance()
+        calendar[Calendar.SECOND] = 0
+        calendar[Calendar.MINUTE] = 0
+        calendar[Calendar.HOUR] = 0
+        calendar[Calendar.AM_PM] = Calendar.AM
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            (1000 * 60 * 60 * 24).toLong(),
+            pendingIntent
+        )
     }
 
 

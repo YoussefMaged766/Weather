@@ -14,11 +14,7 @@
                android:alpha="0" />
 
        </KeyFrameSet>
-        <OnSwipe
-            app:dragDirection="dragUp"
-            app:onTouchUp="autoCompleteToStart"
-            app:touchAnchorId="@+id/linearLayout2"
-            app:touchAnchorSide="top"/>
+
 
     </Transition>
 
