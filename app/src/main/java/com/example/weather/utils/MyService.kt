@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.example.weather.R
 import com.example.weather.ui.MainActivity
+import com.example.weather.ui.SplashScreenActivity
 
 
 class MyService() : Service() {
@@ -23,7 +24,7 @@ class MyService() : Service() {
         sharedPreferences =  getSharedPreferences("PREFERENCE_NAME",Context.MODE_PRIVATE)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val intent1 = Intent(this, MainActivity::class.java)
+        val intent1 = Intent(this, SplashScreenActivity::class.java)
         val pendingIntent: PendingIntent =
             PendingIntent.getActivity(this, 0, intent1, 0)
         intent1.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -40,7 +41,7 @@ class MyService() : Service() {
         val weather = sharedPreferences.getString("weather" , "")
 
         notification = Notification.Builder(this, channelId)
-            .setSmallIcon(R.drawable.sunny)
+            .setSmallIcon(R.drawable.small_logo)
             .setContentTitle("Today in $stateName")
             .setContentText("$temp° $weather   See full forecast")
             .setContentIntent(pendingIntent).build()
